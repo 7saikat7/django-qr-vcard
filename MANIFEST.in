@@ -1,0 +1,13 @@
+include MANIFEST.in
+include LICENCE.txt
+include README.rst
+
+exclude sphinx_reload.py
+recursive-include qr_vcard/templates *
+recursive-include qr_vcard/static *
+recursive-include qr_vcard/locale *
+
+recursive-exclude tests *
+recursive-exclude sandbox *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
