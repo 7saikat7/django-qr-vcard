@@ -1,5 +1,5 @@
 
-from qr_vcard.factories.card import VCardFactory
+from qr_vcard.factories import VCardFactory
 
 
 def test_factory(db):

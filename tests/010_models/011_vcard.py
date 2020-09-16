@@ -1,5 +1,5 @@
 
-from qr_vcard.models.card import VCard
+from qr_vcard.models import VCard
 
 
 def test_basic(db):

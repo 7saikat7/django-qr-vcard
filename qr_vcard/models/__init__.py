@@ -1,4 +1,4 @@
-from .models.vcard import VCard
+from .vcard import VCard
 
 
 __all__ = [

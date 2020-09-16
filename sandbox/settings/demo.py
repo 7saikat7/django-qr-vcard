@@ -6,3 +6,12 @@ Intended to be used with ``make run``.
 from sandbox.settings.base import *
 
 from qr_vcard.settings import *
+
+DEBUG = True
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": join(VAR_PATH, "db", "db.sqlite3"),  # noqa
+    }
+}

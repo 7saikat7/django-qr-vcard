@@ -13,6 +13,7 @@ SPHINX_RELOAD=$(VENV_PATH)/bin/python sphinx_reload.py
 
 DEMO_DJANGO_SECRET_KEY=samplesecretfordev
 PACKAGE_NAME=django-qr-vcard
+PACKAGE_SLUG=`echo $(PACKAGE_NAME) | tr '-' '_'`
 APPLICATION_NAME=qr_vcard
 
 help:
@@ -21,7 +22,7 @@ help:
 	@echo "  install             -- to install this project with virtualenv and Pip"
 	@echo ""
 	@echo "  clean               -- to clean EVERYTHING (Warning)"
-	@echo "  clean-data          -- to clean data (uploaded medias, database, etc..)"
+	@echo "  clean-var          -- to clean data (uploaded medias, database, etc..)"
 	@echo "  clean-doc       -- to remove documentation builds"
 	@echo "  clean-install       -- to clean Python side installation"
 	@echo "  clean-pycache       -- to remove all __pycache__, this is recursive from current directory"
@@ -47,18 +48,18 @@ clean-pycache:
 
 clean-install:
 	rm -Rf $(VENV_PATH)
-	rm -Rf $(PACKAGE_NAME).egg-info
+	rm -Rf $(PACKAGE_SLUG).egg-info
 .PHONY: clean-install
 
-clean-data:
-	rm -Rf data
-.PHONY: clean-data
+clean-var:
+	rm -Rf var
+.PHONY: clean-var
 
 clean-doc:
 	rm -Rf docs/_build
 .PHONY: clean-doc
 
-clean: clean-data clean-doc clean-install clean-pycache
+clean: clean-var clean-doc clean-install clean-pycache
 .PHONY: clean
 
 venv:
@@ -69,8 +70,9 @@ venv:
 .PHONY: venv
 
 create-var-dirs:
-	@mkdir -p data/db
-	@mkdir -p data/static/css
+	@mkdir -p var/db
+	@mkdir -p var/static/css
+	@mkdir -p var/media
 	@mkdir -p sandbox/media
 	@mkdir -p sandbox/static/css
 .PHONY: create-var-dirs
