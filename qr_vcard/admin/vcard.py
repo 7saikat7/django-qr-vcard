@@ -8,7 +8,16 @@ from ..models import VCard
 
 
 class VCardAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        'title',
+        'name_first',
+        'name_last',
+        'mobile_pers',
+        'mobile_pro',
+        'mail_pers',
+        'mail_pro',
+        'web_site',
+        )
 
 
 # Registering interface to model
