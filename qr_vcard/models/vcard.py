@@ -1,18 +1,13 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-def user_directory_path(instance, filename): 
-    """
-    File will be uploaded to MEDIA_ROOT / user_<id>/<filename> 
-    """
-    return 'user_{0}/{1}'.format(instance.user.id, filename)
 
 class VCard(models.Model):
     """
     Vcard model.
     """
-    title = models.CharField(
-        _("Title"),
+    organization = models.CharField(
+        _("Organization"),
         blank=True,
         max_length=150,
         default="",
@@ -59,8 +54,8 @@ class VCard(models.Model):
         max_length = 200,
         default="",
     )
-    image = models.ImageField(
-        _("Image"),
+    logo = models.URLField(
+        _("Logo"),
         blank = True,
         max_length = 200,
         default="",
