@@ -1,0 +1,11 @@
+BEGIN:VCARD
+VERSION:4.0
+FN:samy saad
+EMAIL;TYPE=work:samy@emencia.com
+EMAIL;TYPE=home:samysaad01@gmail
+TEL;TYPE=work:0312456987
+TEL;TYPE=home:0695653201
+ORG:emencia
+URL:www.emencia.com
+LOGO:
+END:VCARD
