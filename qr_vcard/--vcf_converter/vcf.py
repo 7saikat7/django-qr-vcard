@@ -43,7 +43,9 @@ def vcfWriter():
         for elt in vcfLines:
             f.write(elt)
             f.write('\n')
+def main():
+    get_full_name()
+    get_file_name()
+    vcfWriter()
 
-get_full_name()
-get_file_name()
-vcfWriter()
+main()
