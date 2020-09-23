@@ -16,6 +16,7 @@ class VCardAdmin(admin.ModelAdmin):
     actions = [make_vcf, VCard.build_qrcode]
 
     list_display = (
+        'get_full_name',
         'name_last',
         'organization',
         'name_first',
@@ -25,7 +26,6 @@ class VCardAdmin(admin.ModelAdmin):
         'mail_pro',
         'web_site',
         'logo',
-        'get_full_name',
         'build_vcf'
         )
 
