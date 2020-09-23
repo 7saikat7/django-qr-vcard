@@ -95,6 +95,8 @@ class VCard(models.Model):
     def build_qrcode(self):
 
         file_name = self.get_file_name()
+        a = settings.MEDIA_ROOT
+        b = a
         completeName = settings.MEDIA_ROOT + f"qr_code/{file_name}.txt"
 
         qrurl = segno.make_qr('a hyperlink to the vcf file', error="H")
