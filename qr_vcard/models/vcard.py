@@ -67,17 +67,16 @@ class VCard(models.Model):
     )
 
     def get_full_name(self):
-        return str(self.name_first)+' '+str(self.name_last)
+        return f"{self.name_first} {self.name_last}"
 
     def get_file_name(self):
-        return str(self.name_first)+'-'+str(self.name_last)+'-'+str(
-            self.organization)
+        return f"{self.name_first}-{self.name_last}-{self.organization}"
 
     def build_vcf(self):
         vcfLines = [
             'BEGIN:VCARD',
             'VERSION:4.0',
-            f'FN:{str(self.get_full_name())}',
+            f'FN:{self.get_full_name()}',
             f'EMAIL;TYPE=work:{self.mail_pro}',
             f'EMAIL;TYPE=home:{self.mail_pers}',
             f'TEL;TYPE=work:{self.mobile_pro}',
