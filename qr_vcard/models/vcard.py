@@ -2,18 +2,25 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
+from os.path import join
 
 import segno
 
 
 class VCard(models.Model):
     """
-    Vcard model.
+    [summary]
+
+    Args:
+        models ([type]): [description]
+
+    Returns:
+        [type]: [description]
     """
 
     organization = models.CharField(
         _("Organization"),
-        blank=True,
+        blank=False,
         max_length=150,
         default="",
     )
@@ -67,12 +74,27 @@ class VCard(models.Model):
     )
 
     def get_full_name(self):
+        """
+        [summary]
+
+        Returns:
+            [type]: [description]
+        """
         return f"{self.name_first} {self.name_last}"
 
     def get_file_name(self):
+        """
+        [summary]
+
+        Returns:
+            [type]: [description]
+        """
         return f"{self.name_first}-{self.name_last}-{self.organization}"
 
     def build_vcf(self):
+        """
+        [summary]
+        """
         vcfLines = [
             'BEGIN:VCARD',
             'VERSION:4.0',
@@ -86,22 +108,33 @@ class VCard(models.Model):
             f'LOGO:{self.logo}',
             'END:VCARD',
             ]
-        with open(f'{self.get_file_name()}.vcf',
-                  'w') as f:
+
+        path = join(
+            settings.MEDIA_ROOT,
+            'vcf',
+            f'{self.get_file_name()}.vcf'
+            )
+
+        with open(path, 'w') as f:
             for elt in vcfLines:
                 f.write(elt)
                 f.write('\n')
 
     def build_qrcode(self):
+        """
+        [summary]
+        """
 
-        file_name = self.get_file_name()
-        a = settings.MEDIA_ROOT
-        b = a
-        completeName = settings.MEDIA_ROOT + f"qr_code/{file_name}.txt"
+        file_name = f'{self.get_file_name()}.png'
+        completePath = join(
+            settings.MEDIA_ROOT,
+            'qr_codes',
+            file_name
+            )
 
-        qrurl = segno.make_qr('a hyperlink to the vcf file', error="H")
+        qrurl = segno.make_qr('a link to the vcf file', error="H")
         qrurl.save(
-            out=f'qr_{completeName}.png',
+            out=completePath,
             kind="png",
             compresslevel=9,
             scale=10,
@@ -109,7 +142,7 @@ class VCard(models.Model):
             )
 
         # open png image to put the logo
-        img = Image.open(f'qr_{completeName}.png')
+        img = Image.open(completePath)
         width = img.size
 
         # How big the logo we want to put in the qr code png
@@ -130,13 +163,21 @@ class VCard(models.Model):
         img.paste(un_logo, (xmin, ymin, xmax, ymax))
 
         # save the qr_code
-        img.save(f'{completeName}')
+        img.save(completePath)
 
     def __str__(self):
-        return str(self.name_first)+'-'+str(self.name_last)+'-'+str(
-            self.organization)
+        """
+        [summary]
+
+        Returns:
+            [type]: [description]
+        """
+        return self.get_file_name()
 
     class Meta:
+        """
+        [summary]
+        """        
         unique_together = ('name_first', 'name_last', 'organization')
         verbose_name = _("VCard")
         verbose_name_plural = _("VCards")
