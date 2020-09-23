@@ -12,16 +12,18 @@ mail_pers = "samysaad01@gmail"
 
 mail_pro = "samy@emencia.com"
 
-web_site = "www.emencia.com"   
+web_site = "www.emencia.com"
 
 logo = ""
 
 
 def get_full_name():
     return name_first+' '+name_last
-    
+
+
 def get_file_name():
     return name_first+'-'+name_last+'-'+organization
+
 
 def vcfWriter():
 
@@ -43,9 +45,12 @@ def vcfWriter():
         for elt in vcfLines:
             f.write(elt)
             f.write('\n')
+
+
 def main():
     get_full_name()
     get_file_name()
     vcfWriter()
+
 
 main()

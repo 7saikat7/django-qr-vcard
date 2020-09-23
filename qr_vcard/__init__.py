@@ -13,8 +13,8 @@ PROJECT_DIR = os.path.join(os.path.dirname(__file__), "..")
 
 def _extract_version(package_name):
     """
-    Get package version from installed distribution or configuration file if not
-    installed
+    Get package version from installed distribution or
+    configuration file if not installed.
     """
     try:
         return pkg_resources.get_distribution(package_name).version

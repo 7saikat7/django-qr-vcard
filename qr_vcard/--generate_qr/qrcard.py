@@ -10,11 +10,16 @@ mobile_pers = '0695653201'
 mobile_pro = '0312456987'
 mail_pers = "samysaad01@gmail"
 mail_pro = "samy@emencia.com"
-web_site = "www.emencia.com"   
+web_site = "www.emencia.com"
 logo = ""
 
-qrurl = segno.make_qr('https://www.emencia.com/fr/', error = "H")
-qrurl.save(out = 'qr_emencia_url-logo.png', kind = "png", compresslevel = 9, scale = 10, border = 2)
+qrurl = segno.make_qr('https://www.emencia.com/fr/', error="H")
+qrurl.save(out='qr_emencia_url-logo.png',
+           kind="png",
+           compresslevel=9,
+           scale=10,
+           border=2
+           )
 
 # open png image to put the logo
 img = Image.open('qr_emencia_url-logo.png')
@@ -39,13 +44,18 @@ img.paste(un_logo, (xmin, ymin, xmax, ymax))
 # save the qr_code
 img.save('qr_emencia_url+logo.png')
 
-qr_vcard = helpers.make_vcard(name = f'{name_last};{name_first}',
-                              displayname = f'{name_first};{name_last}',
-                              email = (mail_pro, mail_pers),
-                              url = (web_site),
-                              phone = (mobile_pro, mobile_pers),
-                              org = organization,
-                              photo_uri = logo,
+qr_vcard = helpers.make_vcard(name=f'{name_last};{name_first}',
+                              displayname=f'{name_first};{name_last}',
+                              email=(mail_pro, mail_pers),
+                              url=(web_site),
+                              phone=(mobile_pro, mobile_pers),
+                              org=organization,
+                              photo_uri=logo,
                               )
 
-qr_vcard.save(out = 'qr_vcard-logo.png', kind = "png", compresslevel = 9, scale = 10,border = 2)
+qr_vcard.save(out='qr_vcard-logo.png',
+              kind="png",
+              compresslevel=9,
+              scale=10,
+              border=2
+              )

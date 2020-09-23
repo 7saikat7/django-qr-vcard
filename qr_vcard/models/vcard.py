@@ -1,5 +1,3 @@
-import os.path
-
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -57,23 +55,24 @@ class VCard(models.Model):
     )
     web_site = models.URLField(
         _("Web site"),
-        blank = True,
-        max_length = 200,
+        blank=True,
+        max_length=200,
         default="",
     )
     logo = models.URLField(
         _("Logo"),
-        blank = True,
-        max_length = 200,
+        blank=True,
+        max_length=200,
         default="",
     )
 
     def get_full_name(self):
         return str(self.name_first)+' '+str(self.name_last)
-    
+
     def get_file_name(self):
-        return str(self.name_first)+'-'+str(self.name_last)+'-'+str(self.organization)
-    
+        return str(self.name_first)+'-'+str(self.name_last)+'-'+str(
+            self.organization)
+
     def build_vcf(self):
         vcfLines = [
             'BEGIN:VCARD',
@@ -95,12 +94,18 @@ class VCard(models.Model):
                 f.write('\n')
 
     def build_qrcode(self):
-        
+
         file_name = self.get_file_name()
         completeName = settings.MEDIA_ROOT + f"qr_code/{file_name}.txt"
 
-        qrurl = segno.make_qr('a hyperlink to the vcf file', error = "H")    ######
-        qrurl.save(out = f'qr_{completeName}.png', kind = "png", compresslevel = 9, scale = 10, border = 2)
+        qrurl = segno.make_qr('a hyperlink to the vcf file', error="H")
+        qrurl.save(
+            out=f'qr_{completeName}.png',
+            kind="png",
+            compresslevel=9,
+            scale=10,
+            border=2
+            )
 
         # open png image to put the logo
         img = Image.open(f'qr_{completeName}.png')
@@ -112,7 +117,8 @@ class VCard(models.Model):
         # Open the logo image
         un_logo = Image.open('link to logo image .png')
 
-        # Calculate xmin, ymin, xmax, ymax to put the logo at the center of the qrcode
+        # Calculate xmin, ymin, xmax, ymax
+        # to put the logo at the center of the qrcode
         xmin = ymin = int((width / 2) - (logo_size / 2))
         xmax = ymax = int((width / 2) + (logo_size / 2))
 
@@ -124,9 +130,10 @@ class VCard(models.Model):
 
         # save the qr_code
         img.save(f'{completeName}')
-    
+
     def __str__(self):
-        return str(self.name_first)+'-'+str(self.name_last)+'-'+str(self.organization)
+        return str(self.name_first)+'-'+str(self.name_last)+'-'+str(
+            self.organization)
 
     class Meta:
         unique_together = ('name_first', 'name_last', 'organization')
