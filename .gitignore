@@ -11,7 +11,8 @@ __pycache__/
 *.py[cod]
 
 # Site media and builded statics
-/var/
+/var/db
+/var/static
 /sandbox/static
 
 # Settings
