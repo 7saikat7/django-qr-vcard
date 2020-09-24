@@ -17,6 +17,7 @@ class VCardAdmin(admin.ModelAdmin):
     """
 
     list_display = (
+        'get_full_name',
         'name_last',
         'organization',
         'name_first',
@@ -30,8 +31,8 @@ class VCardAdmin(admin.ModelAdmin):
         'build_qrcode',
         )
 
-    ordering = ('name_last',)
-    search_fields = ('name_last', 'organization')
+    ordering = ('organization',)
+    search_fields = ('name_last', 'organization',)
 
 
 # Registering interface to model
