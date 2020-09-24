@@ -21,14 +21,9 @@ class VCardAdmin(admin.ModelAdmin):
         'name_last',
         'organization',
         'name_first',
-        'mobile_pers',
-        'mobile_pro',
-        'mail_pers',
-        'mail_pro',
-        'web_site',
         'logo',
-        'build_vcf',
-        'build_qrcode',
+        'vcf',
+        'qrcode',
         )
 
     ordering = ('organization',)
