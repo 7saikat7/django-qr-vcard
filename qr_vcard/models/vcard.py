@@ -1,10 +1,20 @@
+from os import makedirs
+from os.path import join
+
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
-from os.path import join
 
 import segno
+
+
+def create_folder(chemin):
+    try:
+        makedirs(chemin, exist_ok=True)
+    except OSError as error:
+        print("Directory can not be created")
+        raise error
 
 
 class VCard(models.Model):
@@ -66,10 +76,11 @@ class VCard(models.Model):
         max_length=200,
         default="",
     )
-    logo = models.URLField(
+    logo = models.ImageField(
         _("Logo"),
+        upload_to=f'logos/{organization}/',
         blank=True,
-        max_length=200,
+        max_length=100,
         default="",
     )
 
@@ -95,6 +106,7 @@ class VCard(models.Model):
         """
         [summary]
         """
+
         vcfLines = [
             'BEGIN:VCARD',
             'VERSION:4.0',
@@ -109,47 +121,50 @@ class VCard(models.Model):
             'END:VCARD',
             ]
 
-        path = join(
-            settings.MEDIA_ROOT,
-            'vcf',
-            f'{self.get_file_name()}.vcf'
-            )
+        directory = 'vcf'
+        dir_parent = settings.MEDIA_ROOT
+        file_name = f'{self.get_file_name()}.vcf'
+        path = join(dir_parent, directory)
+        create_folder(path)
+        full_path = join(path, file_name)
 
-        with open(path, 'w') as f:
+        with open(full_path, 'w') as f:
             for elt in vcfLines:
-                f.write(elt)
-                f.write('\n')
+                f.write(f'{elt}\n')
 
     def build_qrcode(self):
         """
         [summary]
         """
 
+        directory = 'qr_codes'
+        dir_parent = settings.MEDIA_ROOT
         file_name = f'{self.get_file_name()}.png'
-        completePath = join(
-            settings.MEDIA_ROOT,
-            'qr_codes',
-            file_name
-            )
+        path = join(dir_parent, directory)
+
+        create_folder(path)
+
+        full_path = join(path, file_name)
 
         qrurl = segno.make_qr('a link to the vcf file', error="H")
         qrurl.save(
-            out=completePath,
+            out=full_path,
             kind="png",
             compresslevel=9,
             scale=10,
             border=2
             )
-
-        # open png image to put the logo
-        img = Image.open(completePath)
+    """
+        # open qrcode image to put the logo
+        img = Image.open(full_path)
         width = img.size
-
-        # How big the logo we want to put in the qr code png
+        # resize logo
         logo_size = 100
 
         # Open the logo image
-        un_logo = Image.open('link to logo image .png')
+
+        path_logo = ''.join(dir_parent, )
+        un_logo = Image.open(f'{self.logo.path}')
 
         # Calculate xmin, ymin, xmax, ymax
         # to put the logo at the center of the qrcode
@@ -163,7 +178,8 @@ class VCard(models.Model):
         img.paste(un_logo, (xmin, ymin, xmax, ymax))
 
         # save the qr_code
-        img.save(completePath)
+        img.save(full_path)
+    """
 
     def __str__(self):
         """
@@ -177,7 +193,7 @@ class VCard(models.Model):
     class Meta:
         """
         [summary]
-        """        
+        """
         unique_together = ('name_first', 'name_last', 'organization')
         verbose_name = _("VCard")
         verbose_name_plural = _("VCards")
