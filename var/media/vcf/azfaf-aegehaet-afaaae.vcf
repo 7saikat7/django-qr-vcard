@@ -7,5 +7,5 @@ TEL;TYPE=work:
 TEL;TYPE=home:
 ORG:afaaae
 URL:
-LOGO:
+LOGO:logos/<django.db.models.fields.CharField>/qr-code-sveetch.png
 END:VCARD
