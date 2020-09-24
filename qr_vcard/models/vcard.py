@@ -78,7 +78,7 @@ class VCard(models.Model):
     )
     logo = models.ImageField(
         _("Logo"),
-        upload_to=f'logos/{organization}/',
+        upload_to=f'qr_vcard/logos/%y/%m/',
         blank=True,
         max_length=100,
         default="",
@@ -89,7 +89,7 @@ class VCard(models.Model):
         [summary]
 
         Returns:
-            [type]: [description]
+            str: full name of a user
         """
         return f"{self.name_first} {self.name_last}"
 
@@ -98,13 +98,23 @@ class VCard(models.Model):
         [summary]
 
         Returns:
-            [type]: [description]
+            str: name of vcf file
         """
         return f"{self.name_first}-{self.name_last}-{self.organization}"
 
     def build_vcf(self):
         """
-        [summary]
+        build_vcf is a method of [VCard] to store data of a user into a Vcard file
+        (.vcf format):
+        1) full name
+        2) email (profesional and personal)
+        3) telephone number (profesional and personal)
+        4) name of organization
+        5) website url
+        6) link to logo
+
+        Returns:
+            [type]: [description]
         """
 
         vcfLines = [
@@ -117,20 +127,21 @@ class VCard(models.Model):
             f'TEL;TYPE=home:{self.mobile_pers}',
             f'ORG:{self.organization}',
             f'URL:{self.web_site}',
-            f'LOGO:{self.logo}',
+            f'LOGO:{self.logo.url}',
             'END:VCARD',
             ]
 
-        directory = 'vcf'
-        dir_parent = settings.MEDIA_ROOT
+        # directory = 'vcf'
+        # dir_parent = settings.MEDIA_ROOT
         file_name = f'{self.get_file_name()}.vcf'
-        path = join(dir_parent, directory)
-        create_folder(path)
-        full_path = join(path, file_name)
+        # path = join(dir_parent, directory)
+        # create_folder(path)
+        # full_path = join(path, file_name)
 
-        with open(full_path, 'w') as f:
+        with open(file_name, 'w') as f:
             for elt in vcfLines:
                 f.write(f'{elt}\n')
+        return file_name
 
     def build_qrcode(self):
         """
@@ -146,7 +157,7 @@ class VCard(models.Model):
 
         full_path = join(path, file_name)
 
-        qrurl = segno.make_qr('a link to the vcf file', error="H")
+        qrurl = segno.make_qr('self.vcf.path', error="H")
         qrurl.save(
             out=full_path,
             kind="png",
@@ -154,7 +165,6 @@ class VCard(models.Model):
             scale=10,
             border=2
             )
-    """
         # open qrcode image to put the logo
         img = Image.open(full_path)
         width = img.size
@@ -164,7 +174,7 @@ class VCard(models.Model):
         # Open the logo image
 
         path_logo = ''.join(dir_parent, )
-        un_logo = Image.open(f'{self.logo.path}')
+        un_logo = Image.open(f'{self.logo}')
 
         # Calculate xmin, ymin, xmax, ymax
         # to put the logo at the center of the qrcode
@@ -179,7 +189,6 @@ class VCard(models.Model):
 
         # save the qr_code
         img.save(full_path)
-    """
 
     def __str__(self):
         """
