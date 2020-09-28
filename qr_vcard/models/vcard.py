@@ -1,32 +1,12 @@
-from os import makedirs
-from os.path import join
-
-from django.conf import settings
+import segno
+from django.core.files import File
+from django.core.files.storage import Storage
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
 
-import segno
-
-
-def create_folder(chemin):
-    try:
-        makedirs(chemin, exist_ok=True)
-    except OSError as error:
-        print("Directory can not be created")
-        raise error
-
 
 class VCard(models.Model):
-    """
-    [summary]
-
-    Args:
-        models ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """
 
     organization = models.CharField(
         _("Organization"),
@@ -78,15 +58,33 @@ class VCard(models.Model):
     )
     logo = models.ImageField(
         _("Logo"),
-        upload_to=f'qr_vcard/logos/%y/%m/',
+        upload_to='qr_vcard/logos/%y/%m/',
         blank=True,
+        db_index=True,
         max_length=100,
         default="",
+    )
+    qrcode = models.ImageField(
+        _("Qr code"),
+        upload_to='qr_vcard/qrcodes/%Y/%m/',
+        blank=True,
+        null=True,
+        db_index=True,
+        max_length=100,
+    )
+    vcf = models.FileField(
+        _("Vcard"),
+        upload_to='qr_vcard/vcf_files/%Y/%m/',
+        blank=True,
+        null=True,
+        db_index=True,
+        max_length=100,
     )
 
     def get_full_name(self):
         """
-        [summary]
+        Gets the first name and the last name for data purposes
+        (vcard file data).
 
         Returns:
             str: full name of a user
@@ -95,7 +93,8 @@ class VCard(models.Model):
 
     def get_file_name(self):
         """
-        [summary]
+        Gets the first name, the last name and
+        the organization name for file naming purposes.
 
         Returns:
             str: name of vcf file
@@ -104,8 +103,8 @@ class VCard(models.Model):
 
     def build_vcf(self):
         """
-        build_vcf is a method of [VCard] to store data of a user into a Vcard file
-        (.vcf format):
+        build_vcf is a method of :class:`VCard()` to store data
+        of a user into a Vcard file (.vcf format):
         1) full name
         2) email (profesional and personal)
         3) telephone number (profesional and personal)
@@ -114,7 +113,7 @@ class VCard(models.Model):
         6) link to logo
 
         Returns:
-            [type]: [description]
+            File: a vcard file.
         """
 
         vcfLines = [
@@ -127,54 +126,79 @@ class VCard(models.Model):
             f'TEL;TYPE=home:{self.mobile_pers}',
             f'ORG:{self.organization}',
             f'URL:{self.web_site}',
-            f'LOGO:{self.logo.url}',
+            # for LOGO, see if/else statement
             'END:VCARD',
             ]
 
-        # directory = 'vcf'
-        # dir_parent = settings.MEDIA_ROOT
+        if self.logo.url is None:
+            vcfLines.insert(9, 'LOGO:')
+        else:
+            vcfLines.insert(9, f'LOGO:{self.logo.url}')
+
         file_name = f'{self.get_file_name()}.vcf'
-        # path = join(dir_parent, directory)
-        # create_folder(path)
-        # full_path = join(path, file_name)
 
         with open(file_name, 'w') as f:
+            vcf_file = File(f)
             for elt in vcfLines:
-                f.write(f'{elt}\n')
-        return file_name
+                vcf_file.write(f'{elt}\n')
+        return vcf_file
 
     def build_qrcode(self):
         """
-        [summary]
+        With segno module (https://github.com/heuer/segno),
+        generate a QrCode in PNG format.
+
+        error='H' -> 30% error marging
+
+        scale=10  -> indicate the size of a single module.
+        For PNGs, the scaling factor is interepreted as pixel-size
+        (1 = 1 pixel)
+
+        border=4  -> size of the quiet zone (4 is recommended in segno doc)
+
+        (Could use `.show()` instead of save: saves image as temporary file
+        and opens it with the standard PNG viewer application.)
+
+        Returns:
+            File: a qr code file redirecting to Vcard file link.
         """
 
-        directory = 'qr_codes'
-        dir_parent = settings.MEDIA_ROOT
-        file_name = f'{self.get_file_name()}.png'
-        path = join(dir_parent, directory)
+        file_name = f'qr_{self.get_file_name()}.png'
 
-        create_folder(path)
-
-        full_path = join(path, file_name)
-
-        qrurl = segno.make_qr('self.vcf.path', error="H")
+        qrurl = segno.make_qr(f'{self.vcf.url}', error="H")
         qrurl.save(
-            out=full_path,
+            out=file_name,
             kind="png",
             compresslevel=9,
             scale=10,
-            border=2
+            border=4
             )
-        # open qrcode image to put the logo
-        img = Image.open(full_path)
+
+        if Storage.exists(self.logo.name):
+            self.embed_logo_into_qrcode()
+        else:
+            with Image.open(file_name) as f:
+                qr_file = File(f)
+            return qr_file
+
+    def embed_logo_into_qrcode(self):
+        """
+        With PILLOW module (https://github.com/python-pillow/Pillow),
+        embed a logo into a QrCode.
+
+        Returns:
+            File: a qr code file embeded with logo,
+            redirecting to Vcard file link.
+        """
+
+        qr_path = f'{self.qrcode.path}'
+        logo_path = f'{self.logo.path}'
+
+        img = Image.open(qr_path)
         width = img.size
-        # resize logo
         logo_size = 100
 
-        # Open the logo image
-
-        path_logo = ''.join(dir_parent, )
-        un_logo = Image.open(f'{self.logo}')
+        current_logo = Image.open(logo_path)
 
         # Calculate xmin, ymin, xmax, ymax
         # to put the logo at the center of the qrcode
@@ -182,27 +206,19 @@ class VCard(models.Model):
         xmax = ymax = int((width / 2) + (logo_size / 2))
 
         # resize the logo as calculated
-        un_logo = un_logo.resize((xmax - xmin, ymax - ymin))
+        current_logo = current_logo.resize((xmax - xmin, ymax - ymin))
 
         # put the logo in the qr code
-        img.paste(un_logo, (xmin, ymin, xmax, ymax))
-
-        # save the qr_code
-        img.save(full_path)
+        img.paste(current_logo, (xmin, ymin, xmax, ymax))
+        img.save(qr_path)
+        with Image.open(qr_path) as f:
+            qr_file = File(f)
+        return qr_file
 
     def __str__(self):
-        """
-        [summary]
-
-        Returns:
-            [type]: [description]
-        """
         return self.get_file_name()
 
     class Meta:
-        """
-        [summary]
-        """
         unique_together = ('name_first', 'name_last', 'organization')
         verbose_name = _("VCard")
         verbose_name_plural = _("VCards")
