@@ -81,6 +81,16 @@ class VCard(models.Model):
         max_length=100,
     )
 
+    def save(self, *args, **kwargs):
+        obj = super().save(*args, **kwargs)
+        vfile = obj.build_vcf()
+        # do whatever you have with "vfile"
+
+        # perform again save to save your fillings
+
+        obj.save()
+        return obj
+
     def get_full_name(self):
         """
         Gets the first name and the last name for data purposes
