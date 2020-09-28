@@ -39,7 +39,7 @@ class VCardAdmin(admin.ModelAdmin):
         'logo',
         )
 
-    ordering = ('organization',)
+    ordering = ('name_last', 'name_first')
     search_fields = ('name_last', 'organization',)
 
 
