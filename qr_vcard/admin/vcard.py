@@ -9,21 +9,34 @@ from ..models import VCard
 
 
 class VCardAdmin(admin.ModelAdmin):
-    """
-    [summary]
-
-    Args:
-        admin ([type]): [description]
-    """
-
+    fieldsets = (
+        (None, {
+            'fields': (
+                'organization',
+                ('name_first', 'name_last'),
+                ('mobile_pro', 'mail_pro'),
+                'logo',
+                )
+        }),
+        ('Advanced options', {
+            'classes': ('collapse',),
+            'fields': (
+                'web_site',
+                ('mobile_pers', 'mail_pers'),
+                ('vcf', 'qrcode'),
+                ),
+        }),
+    )
+    readonly_fields = (
+        'vcf',
+        'qrcode',
+        )
     list_display = (
         'get_full_name',
         'name_last',
         'organization',
         'name_first',
         'logo',
-        'vcf',
-        'qrcode',
         )
 
     ordering = ('organization',)
