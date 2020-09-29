@@ -1,6 +1,5 @@
 import segno
 from django.core.files import File
-from django.core.files.storage import Storage
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
@@ -58,7 +57,7 @@ class VCard(models.Model):
     )
     logo = models.ImageField(
         _("Logo"),
-        upload_to='qr_vcard/logos/%y/%m/',
+        upload_to='qr_vcard/logos/%Y/%m/',
         blank=True,
         null=True,
         db_index=True,
@@ -85,17 +84,13 @@ class VCard(models.Model):
     def save(self, *args, **kwargs):
 
         if self.organization and self.name_last and self.name_first:
-            self.vcf.save(
-                self.get_file_name_vcf(),
-                self.build_vcf()
-                )
+            self.build_vcf()
         if self.vcf:
-            self.qrcode.save(
-                self.get_file_name_qr(),
-                self.build_qrcode()
-                )
+            self.build_qrcode()
+        if self.logo and self.vcf:
+            self.embed_logo_into_qrcode()
 
-        return super().save(self, *args, **kwargs)
+        return super(VCard, self).save(*args, **kwargs)
 
     def get_full_name(self):
         """
@@ -161,7 +156,7 @@ class VCard(models.Model):
         else:
             vcfLines.insert(9, f'LOGO:{self.logo.url}')
 
-        file_name = 'file1.vcf'
+        file_name = f'{self.get_file_name_vcf()}'
 
         with open(file_name, 'w') as f:
             vcf_file = File(f)
@@ -189,7 +184,7 @@ class VCard(models.Model):
             File: a qr code image redirecting to Vcard file link.
         """
 
-        file_name = 'file2.png'
+        file_name = f'{self.get_file_name_qr()}'
 
         qrurl = segno.make_qr(f'{self.vcf.url}', error="H")
         qrurl.save(
@@ -199,13 +194,9 @@ class VCard(models.Model):
             scale=10,
             border=4
             )
-
-        if Storage.exists(self.logo.name):
-            self.embed_logo_into_qrcode()
-        else:
-            with Image.open(file_name) as f:
-                qr_file = File(f)
-            return qr_file
+        with Image.open(file_name) as f:
+            qr_file = File(f)
+        return qr_file
 
     def embed_logo_into_qrcode(self):
         """
