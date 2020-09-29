@@ -1,0 +1,11 @@
+BEGIN:VCARD
+VERSION:4.0
+FN:Sam Sasasasa
+EMAIL;TYPE=work:samy@emencia.com
+EMAIL;TYPE=home:
+TEL;TYPE=work:0695352060
+TEL;TYPE=home:
+ORG:Emencia
+URL:
+LOGO:/media/qr_vcard/logos/20/09/qr-code-django.png
+END:VCARD
