@@ -125,7 +125,7 @@ class VCard(models.Model):
     def build_vcf(self):
         """
         build_vcf is a method of :class:`VCard()` to store data
-        of a user into a Vcard file (.vcf format):
+        of a user into a Vcard format:
         1) full name
         2) email (profesional and personal)
         3) telephone number (profesional and personal)
@@ -134,7 +134,7 @@ class VCard(models.Model):
         6) link to logo
 
         Returns:
-            File: a vcard file.
+            str: a string in vcard format.
         """
 
         vcfLines = [
