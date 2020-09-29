@@ -60,6 +60,7 @@ class VCard(models.Model):
         _("Logo"),
         upload_to='qr_vcard/logos/%y/%m/',
         blank=True,
+        null=True,
         db_index=True,
         max_length=100,
         default="",
@@ -82,14 +83,19 @@ class VCard(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        obj = super().save(*args, **kwargs)
-        vfile = obj.build_vcf()
-        # do whatever you have with "vfile"
 
-        # perform again save to save your fillings
+        if self.organization and self.name_last and self.name_first:
+            self.vcf.save(
+                self.get_file_name_vcf(),
+                self.build_vcf()
+                )
+        if self.vcf:
+            self.qrcode.save(
+                self.get_file_name_qr(),
+                self.build_qrcode()
+                )
 
-        obj.save()
-        return obj
+        return super().save(self, *args, **kwargs)
 
     def get_full_name(self):
         """
@@ -101,15 +107,25 @@ class VCard(models.Model):
         """
         return f"{self.name_first} {self.name_last}"
 
-    def get_file_name(self):
+    def get_file_name_vcf(self):
         """
         Gets the first name, the last name and
-        the organization name for file naming purposes.
+        the organization name for vcf file naming purposes.
 
         Returns:
             str: name of vcf file
         """
-        return f"{self.name_first}-{self.name_last}-{self.organization}"
+        return f"{self.name_first}-{self.name_last}-{self.organization}.vcf"
+
+    def get_file_name_qr(self):
+        """
+        Gets the first name, the last name and
+        the organization name for qrcode image naming purposes.
+
+        Returns:
+            str: name of qrcode image
+        """
+        return f"qr_{self.name_first}-{self.name_last}-{self.organization}.png"
 
     def build_vcf(self):
         """
@@ -145,13 +161,13 @@ class VCard(models.Model):
         else:
             vcfLines.insert(9, f'LOGO:{self.logo.url}')
 
-        file_name = f'{self.get_file_name()}.vcf'
+        file_name = 'file1.vcf'
 
         with open(file_name, 'w') as f:
             vcf_file = File(f)
             for elt in vcfLines:
                 vcf_file.write(f'{elt}\n')
-        return vcf_file
+            return vcf_file
 
     def build_qrcode(self):
         """
@@ -170,10 +186,10 @@ class VCard(models.Model):
         and opens it with the standard PNG viewer application.)
 
         Returns:
-            File: a qr code file redirecting to Vcard file link.
+            File: a qr code image redirecting to Vcard file link.
         """
 
-        file_name = f'qr_{self.get_file_name()}.png'
+        file_name = 'file2.png'
 
         qrurl = segno.make_qr(f'{self.vcf.url}', error="H")
         qrurl.save(
@@ -197,7 +213,7 @@ class VCard(models.Model):
         embed a logo into a QrCode.
 
         Returns:
-            File: a qr code file embeded with logo,
+            File: a qr code image embeded with a logo,
             redirecting to Vcard file link.
         """
 
@@ -226,7 +242,7 @@ class VCard(models.Model):
         return qr_file
 
     def __str__(self):
-        return self.get_file_name()
+        return self.get_full_name()
 
     class Meta:
         unique_together = ('name_first', 'name_last', 'organization')
