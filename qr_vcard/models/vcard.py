@@ -156,13 +156,7 @@ class VCard(models.Model):
         else:
             vcfLines.insert(9, f'LOGO:{self.logo.url}')
 
-        file_name = f'{self.get_file_name_vcf()}'
-
-        with open(file_name, 'w') as f:
-            vcf_file = File(f)
-            for elt in vcfLines:
-                vcf_file.write(f'{elt}\n')
-            return vcf_file
+        return "\n".join(vcfLines)
 
     def build_qrcode(self):
         """
