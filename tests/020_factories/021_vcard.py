@@ -16,4 +16,11 @@ def test_factory(db):
         mail_pro="company_email",
         web_site="url",
     )
-    assert instance.title == "foo"
+    assert instance.organization == "company"
+    assert instance.name_first == "first_name"
+    assert instance.name_last == "last_name"
+    assert instance.mobile_pers == "phone_number"
+    assert instance.mobile_pro == "phone_number"
+    assert instance.mail_pers == "email"
+    assert instance.mail_pro == "company_email"
+    assert instance.web_site == "url"
