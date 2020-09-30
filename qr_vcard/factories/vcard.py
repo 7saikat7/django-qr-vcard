@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 import factory
 
-from ..models import VCard
+from qr_vcard.models.vcard import VCard
+
+
+def fakir(data_type: str, nbr_char: int):
+    return factory.Faker(data_type,
+                         max_nb_char=nbr_char)
 
 
 class VCardFactory(factory.django.DjangoModelFactory):
     """
     Factory to create instance of a VCard.
     """
-    def fakir(data_type: str, nbr_char: int):
-        return factory.Faker(data_type, max_nb_char=nbr_char)
-
     organization = fakir("company", 150)
     name_first = fakir("first_name", 150)
     name_last = fakir("last_name", 150)
