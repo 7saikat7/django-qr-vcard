@@ -107,7 +107,7 @@ flake:
 .PHONY: flake
 
 tests:
-	$(PYTEST) -vv tests/
+	$(PYTEST) -vvv tests/
 .PHONY: tests
 
 quality: tests flake
