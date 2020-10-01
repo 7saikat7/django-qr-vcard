@@ -230,6 +230,13 @@ class VCard(models.Model):
         return self.get_full_name()
 
     class Meta:
-        unique_together = ('name_first', 'name_last', 'organization')
+        models.UniqueConstraint(
+            fields=[
+                'name_first',
+                'name_last',
+                'organization'
+                ],
+            name='filename'
+            )
         verbose_name = _("VCard")
         verbose_name_plural = _("VCards")
